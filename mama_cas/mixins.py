@@ -35,12 +35,17 @@ class LoginRequiredMixin(object):
     def dispatch(self, request, *args, **kwargs):
         return super(LoginRequiredMixin, self).dispatch(request, *args, **kwargs)
 
-
-class CsrfProtectMixin(object):
-    """View mixin to require CSRF protection."""
-    @method_decorator(csrf_protect)
-    def dispatch(self, request, *args, **kwargs):
-        return super(CsrfProtectMixin, self).dispatch(request, *args, **kwargs)
+if 'django.middleware.csrf.CsrfViewMiddleware' in settings.MIDDLEWARE_CLASSES:
+    class CsrfProtectMixin(object):
+        """View mixin to require CSRF protection."""
+        @method_decorator(csrf_protect)
+        def dispatch(self, request, *args, **kwargs):
+            return super(CsrfProtectMixin, self).dispatch(request, *args, **kwargs)
+else:
+    class CsrfProtectMixin(object):
+        """View mixin that does not require CSRF protection."""
+        def dispatch(self, request, *args, **kwargs):
+            return super(CsrfProtectMixin, self).dispatch(request, *args, **kwargs)
 
 
 class CasResponseMixin(object):
