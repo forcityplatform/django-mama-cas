@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
                 ('consumed', models.DateTimeField(null=True, verbose_name='consumed')),
                 ('service', models.CharField(max_length=255, verbose_name='service')),
                 ('primary', models.BooleanField(default=False, verbose_name='primary')),
-                ('user', models.ForeignKey(verbose_name='user', to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(verbose_name='user', to=settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL)),
             ],
             options={
                 'verbose_name': 'service ticket',
