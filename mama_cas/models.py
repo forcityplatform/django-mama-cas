@@ -274,7 +274,7 @@ class ServiceTicket(Ticket):
         service ticket string that instantiated the session.
         """
         request = SingleSignOutRequest(context={'ticket': self})
-        service_url = self.get_service_url()
+        service_url = self.get_service_logout_url()
         try:
             resp = requests.post(service_url, data=request.render_content(),
                                  headers=request.headers())
