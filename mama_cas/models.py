@@ -247,6 +247,26 @@ class ServiceTicket(Ticket):
             return True
         return False
 
+    def get_service_mapping(self):
+        service_mappings = getattr(settings, 'SERVICE_URL_MAPPING', [])
+        if service_mappings is not None:
+            for service_mapping in service_mappings:
+                service_filter = service_mapping.get('filter')
+                if service_filter:
+                    re_obj = re.compile(service_filter, re.MULTILINE)
+                    if re_obj.match(self.service):
+                        return service_mapping
+        return None
+
+    def get_service_logout_url(self):
+        service_mapping = self.get_service_mapping()
+        if service_mapping:
+            service_logout_url = service_mapping.get('logout_url')
+            if service_logout_url:
+                result = re.sub("(?m)%s" % service_mapping.get('filter'), service_logout_url, self.service)
+                return result
+        return self.service
+
     def request_sign_out(self):
         """
         Send a POST request to the ``ServiceTicket``s service URL to
@@ -254,15 +274,16 @@ class ServiceTicket(Ticket):
         service ticket string that instantiated the session.
         """
         request = SingleSignOutRequest(context={'ticket': self})
+        service_url = self.get_service_url()
         try:
-            resp = requests.post(self.service, data=request.render_content(),
+            resp = requests.post(service_url, data=request.render_content(),
                                  headers=request.headers())
             resp.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.warning("Single sign-out request to %s returned %s" %
-                           (self.service, e))
+                           (service_url, e))
         else:
-            logger.debug("Single sign-out request sent to %s" % self.service)
+            logger.debug("Single sign-out request sent to %s" % service_url)
 
 
 class ProxyTicket(Ticket):
