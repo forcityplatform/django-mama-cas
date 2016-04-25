@@ -73,6 +73,10 @@ def redirect(to, *args, **kwargs):
     params = kwargs.pop('params', {})
 
     try:
+        redirect_urls = getattr(settings, 'MAMA_CAS_REDIRECT_URLS', {})
+        redirect_url = redirect_urls.get(to)
+        if redirect_url:
+            to = redirect_url
         to = urlresolvers.reverse(to, args=args, kwargs=kwargs)
     except urlresolvers.NoReverseMatch:
         if '/' not in to and '.' not in to:
