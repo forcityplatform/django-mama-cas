@@ -74,11 +74,13 @@ def redirect(to, *args, **kwargs):
 
     try:
         redirect_urls = getattr(settings, 'MAMA_CAS_REDIRECT_URLS', {})
+        redirect_url = None
         if isinstance(to, basestring):
             redirect_url = redirect_urls.get(to)
-            if redirect_url is not None:
-                to = redirect_url
-        to = urlresolvers.reverse(to, args=args, kwargs=kwargs)
+        if redirect_url is not None:
+            to = redirect_url
+        else:
+            to = urlresolvers.reverse(to, args=args, kwargs=kwargs)
     except urlresolvers.NoReverseMatch:
         if '/' not in to and '.' not in to:
             to = urlresolvers.reverse('cas_login')
