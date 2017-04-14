@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate
 from django.utils.translation import ugettext_lazy as _
 
+from mama_cas.utils import get_callable
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,15 @@ class LoginForm(forms.Form):
 
         if username and password:
             try:
-                self.user = authenticate(username=username, password=password)
+                callbacks = getattr(settings, 'MAMA_CAS_PRELOGIN_CALLBACKS', ())
+                callback_res = True
+                for path in callbacks:
+                    callback = get_callable(path)
+                    callback_res = callback_res and callback(username, password)
+                if callback_res:
+                    self.user = authenticate(username=username, password=password)
+                else:
+                    self.user = None
             except Exception:
                 logger.exception("Error authenticating %s" % username)
                 error_msg = _('Internal error while authenticating user')
